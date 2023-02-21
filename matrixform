@@ -1,0 +1,54 @@
+[np.array([[140, 0,0,-70,-140,70], [0,400,-60,0,60,-400], [0,-60,100,0,-100,60] ,[-70,0,0,35,70,-35],[-140,60,-100,70,240,-130][70,-400,60,-35,-130,435]]),np.array([[100, 0,-100,60,0,-60], [0,35,70,-35,-70,0], [-100,70,240,-130,-140,60] ,[60,-35,-130,435,70,-400],[0,-70,-140,70,140,0][-60,0,60,-400,0,400]])]
+
+
+convert this "
+import numpy as np
+import pandas as pd
+
+def generate_indices_csv(filename, n, num_element_stiffness_matrices):
+    indices = np.zeros((num_element_stiffness_matrices, 6), dtype=int)
+    for i in range(num_element_stiffness_matrices):
+        indices[i, :] = np.random.randint(1, n+1, 6)
+    df = pd.DataFrame(indices, columns=['i1', 'i2', 'i3','i4','i5','i6'])
+    df.to_csv(filename, index=False)
+
+def assemble_global_stiffness_matrix(n, element_stiffness_matrices, indices_df):
+    global_stiffness_matrix = np.zeros((n, n))
+    for i, row in indices_df.iterrows():
+        index = row.tolist()
+        for row in range(element_stiffness_matrices[i].shape[0]):
+            for col in range(element_stiffness_matrices[i].shape[1]):
+                if index[row] <= n and index[col] <= n:
+                    global_stiffness_matrix[index[row]-1, index[col]-1] += element_stiffness_matrices[i][row, col]
+    return global_stiffness_matrix
+
+n = 8
+num_element_stiffness_matrices = 2
+element_stiffness_matrices = [np.array([[140, 0,0,-70,-140,70], [0,400,-60,0,60,-400], [0,-60,100,0,-100,60] ,[-70,0,0,35,70,-35],[-140,60,-100,70,240,-130][70,-400,60,-35,-130,435]]),
+                             np.array([[100, 0,-100,60,0,-60], [0,35,70,-35,-70,0], [-100,70,240,-130,-140,60] ,[60,-35,-130,435,70,-400],[0,-70,-140,70,140,0][-60,0,60,-400,0,400]])]
+#filename = 'indices.csv'
+#generate_indices_csv(filename, n, num_element_stiffness_matrices)
+indices_df = pd.read_csv('/content/indices6dlogan.csv')
+global_stiffness_matrix = assemble_global_stiffness_matrix(n, element_stiffness_matrices, indices_df)
+print(global_stiffness_matrix)
+# Plot the global stiffness matrix as a sparse plot array
+plt.spy(global_stiffness_matrix, markersize=15, color='red')
+plt.show()
+# Save the global stiffness matrix in a text file
+np.savetxt("global_stiffness_matrix.txt", global_stiffness_matrix, fmt='%d')
+# Save the global stiffness matrix in Python matrix format
+import numpy as np
+
+with open('global_stiffness_matrix.py', 'w') as f:
+    f.write('import numpy as np\n\n')
+    f.write('global_stiffness_matrix = np.array([\n')
+    for i in range(global_stiffness_matrix.shape[0]):
+        f.write('    [')
+        for j in range(global_stiffness_matrix.shape[1]):
+            f.write(str(global_stiffness_matrix[i][j]))
+            if j < global_stiffness_matrix.shape[1] - 1:
+                f.write(', ')
+        f.write(']')
+        if i < global_stiffness_matrix.shape[0] - 1:
+            f.write(',\n')
+    f.write('])\n')" code so that ui give indices in form of 1,1,2,2,3,3 in dary l logan book form 
