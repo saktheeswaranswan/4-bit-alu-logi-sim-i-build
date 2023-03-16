@@ -6,7 +6,7 @@ import cv2
 cap = cv2.VideoCapture(0)
 
 # Define the screen size
-screen_size = (640, 480)
+screen_size = (720, 640)
 
 # Define the mouse callback function to get the coordinates
 def get_coords(event, x, y, flags, param):
